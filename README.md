@@ -2,12 +2,11 @@
 
 **Lim EnLe | UOW ID 1036488 | SIM–UOW, full-time | Session 4, 2026**
 
-A responsive React SPA for a fictional pet welfare society. This work was prepared with ChatGPT assistance; review the code and acknowledgement before submission.
+A responsive React SPA for a fictional pet welfare society. 
 
 **Primary public website:** https://leafyve.github.io/pet-heaven/  
 **Source repository:** https://github.com/leafyve/pet-heaven
 
-The previous ChatGPT-hosted version is retained at https://pet-heaven-enle.polan82627.chatgpt.site. GitHub Pages is the primary submission link and does not require a ChatGPT account.
 
 ## Run locally
 
