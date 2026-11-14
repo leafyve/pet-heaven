@@ -59,3 +59,20 @@ test("request export contains selected pet and all field values", () => {
   assert.match(text, /A stable home & daily care/);
   assert.match(text, /does not confirm adoption/);
 });
+
+test("password validation preserves spaces as part of demo credentials", () => {
+  const fields = [{ name: "password", label: "Password", type: "password", required: true, minLength: 8 }];
+  assert.deepEqual(validate({ password: " demo123 " }, fields), {});
+  assert.ok(validate({ password: "short" }, fields).password);
+  assert.ok(validate({ password: "        " }, fields).password);
+});
+
+test("select values and whole-year applicant age are checked", () => {
+  const fields = [
+    { name: "rating", label: "Rating", required: true, options: ["1", "2", "3", "4", "5"] },
+    { name: "age", label: "Age", type: "number", min: 21, max: 100 },
+  ];
+  assert.equal(Object.keys(validate({ rating: "6", age: "21.5" }, fields)).length, 2);
+  assert.deepEqual(validate({ rating: "5", age: "22" }, fields), {});
+  assert.deepEqual(validate({ petAge: "0.5" }, [{ name: "petAge", type: "number", min: 0, max: 30, step: "any" }]), {});
+});

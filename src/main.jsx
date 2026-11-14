@@ -26,10 +26,11 @@ function App() {
   const [route, query = ""] = hash.split("?");
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = `${route === "/" ? "A little love. A new beginning." : route.split("/")[1].replace(/^./, (c) => c.toUpperCase())} | Pet Heaven`;
+    document.title = `${route === "/" ? "A little love. A new beginning." : (route.split("/")[1] || "Page not found").replace(/^./, (c) => c.toUpperCase())} | Pet Heaven`;
     document.querySelector("main")?.focus({ preventScroll: true });
   }, [hash]);
-  const next = new URLSearchParams(query).get("next") || "/pets";
+  const requestedNext = new URLSearchParams(query).get("next");
+  const next = /^\/(?:pets|saved|community|adopt\/[a-z]+)$/.test(requestedNext || "") ? requestedNext : "/pets";
   let page;
   switch (route) {
     case "/":
@@ -90,7 +91,7 @@ function App() {
           {notice}
         </p>
       )}
-      <main id="main" tabIndex="-1" key={route}>
+      <main id="main" tabIndex="-1" key={hash}>
         {page}
       </main>
       <Footer />

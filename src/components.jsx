@@ -23,6 +23,7 @@ export function Button({ children, href, secondary = false, ...props }) {
 export function Header({ route }) {
   const { user, logout, saved } = useApp();
   const [open, setOpen] = useState(false);
+  const menuRef = useRef();
   useEffect(() => setOpen(false), [route]);
   return (
     <>
@@ -32,7 +33,12 @@ export function Header({ route }) {
           Find your companion <ArrowRight size={13} />
         </a>
       </div>
-      <header className="header">
+      <header className="header" onKeyDown={(e) => {
+        if (e.key === "Escape" && open) {
+          setOpen(false);
+          menuRef.current?.focus();
+        }
+      }}>
         <a className="brand" href="#/">
           <span className="brand-icon">
             <PawPrint />
@@ -41,13 +47,16 @@ export function Header({ route }) {
         </a>
         <button
           className="icon mobile-menu"
+          ref={menuRef}
+          aria-controls="main-navigation"
           aria-label="Toggle navigation"
           aria-expanded={open}
           onClick={() => setOpen(!open)}
         >
-          <Menu />
+          {open ? <X /> : <Menu />}
         </button>
-        <nav className={open ? "open" : ""} aria-label="Main navigation">
+        <nav id="main-navigation" className={open ? "open" : ""} aria-label="Main navigation"
+          onClick={() => setOpen(false)}>
           {[
             ["/", "Home"],
             ["/pets", "Find a pet"],
@@ -63,6 +72,10 @@ export function Header({ route }) {
               {label}
             </a>
           ))}
+          <a className="mobile-link" href="#/saved">Saved pets ({saved.length})</a>
+          <a className="mobile-link" href="#/community">Community</a>
+          <a className="mobile-link" href="#/release">Rehome a pet</a>
+          {!user && <a className="mobile-link" href="#/login">Log in</a>}
         </nav>
         <div className="header-actions">
           <a
@@ -172,7 +185,7 @@ export function PetCard({ pet, onOpen }) {
           aria-label={`Meet ${pet.name}`}
         >
           <img
-            src={`/images/${pet.id}.jpg`}
+            src={`${import.meta.env.BASE_URL}images/${pet.id}.jpg`}
             alt={`${pet.name}, ${pet.breed}`}
             loading="lazy"
           />
@@ -234,6 +247,18 @@ export function Modal({ title, children, onClose }) {
       ref={ref}
       aria-labelledby={id}
       onCancel={onClose}
+      onKeyDown={(e) => {
+        if (e.key !== "Tab") return;
+        const controls = ref.current.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]');
+        const first = controls[0], last = controls[controls.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }}
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
@@ -256,7 +281,7 @@ export function PetModal({ pet, onClose }) {
   return (
     <Modal title={`Meet ${pet.name}`} onClose={onClose}>
       <div className="pet-detail">
-        <img src={`/images/${pet.id}.jpg`} alt={`${pet.name}, ${pet.breed}`} />
+        <img src={`${import.meta.env.BASE_URL}images/${pet.id}.jpg`} alt={`${pet.name}, ${pet.breed}`} />
         <div className="detail-copy">
           <span className="tag">Available for adoption</span>
           <h2>Hello, I’m {pet.name}.</h2>
@@ -304,7 +329,7 @@ export function Field({ field, value, onChange, error }) {
     <div className={`field ${field.wide ? "wide" : ""}`}>
       <label htmlFor={id}>
         {field.label}
-        {field.required && <span> *</span>}
+        {field.required && <span aria-hidden="true"> *</span>}
       </label>
       {field.options ? (
         <select {...common}>
@@ -322,6 +347,7 @@ export function Field({ field, value, onChange, error }) {
           placeholder={field.placeholder || ""}
           min={field.min}
           max={field.max}
+          step={field.step}
           autoComplete={field.autoComplete}
           maxLength={field.type === "password" ? 128 : 200}
         />

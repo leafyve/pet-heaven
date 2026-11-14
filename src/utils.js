@@ -20,8 +20,9 @@ export function filterPets(
 export function validate(values, fields) {
   const errors = {};
   for (const f of fields) {
-    const v = String(values[f.name] ?? "").trim();
-    if (f.required && !v) errors[f.name] = `${f.label} is required.`;
+    const raw = String(values[f.name] ?? "");
+    const v = f.type === "password" ? raw : raw.trim();
+    if (f.required && !v.trim()) errors[f.name] = `${f.label} is required.`;
     else if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
       errors[f.name] = "Enter a valid email address.";
     else if (
@@ -32,15 +33,18 @@ export function validate(values, fields) {
       errors[f.name] = "Enter a valid phone number (at least 8 digits).";
     else if (v && f.minLength && v.length < f.minLength)
       errors[f.name] = `Use at least ${f.minLength} characters.`;
+    else if (v && f.options && !f.options.includes(v))
+      errors[f.name] = "Select one of the available options.";
     else if (
       v &&
       f.type === "number" &&
       (!Number.isFinite(Number(v)) ||
         Number(v) < (f.min ?? 0) ||
-        Number(v) > (f.max ?? 100))
+        Number(v) > (f.max ?? 100) ||
+        (f.step !== "any" && !Number.isInteger(Number(v))))
     )
       errors[f.name] =
-        `Enter a number between ${f.min ?? 0} and ${f.max ?? 100}.`;
+        `Enter ${f.step === "any" ? "a number" : "a whole number"} between ${f.min ?? 0} and ${f.max ?? 100}.`;
   }
   return errors;
 }

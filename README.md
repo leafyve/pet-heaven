@@ -4,6 +4,11 @@
 
 A responsive React SPA for a fictional pet welfare society. This work was prepared with ChatGPT assistance; review the code and acknowledgement before submission.
 
+**Primary public website:** https://leafyve.github.io/pet-heaven/  
+**Source repository:** https://github.com/leafyve/pet-heaven
+
+The previous ChatGPT-hosted version is retained at https://pet-heaven-enle.polan82627.chatgpt.site. GitHub Pages is the primary submission link and does not require a ChatGPT account.
+
 ## Run locally
 
 Install Node.js 20.19+ (or a current supported LTS version), then:
@@ -18,9 +23,26 @@ Open the local URL printed by Vite. Do not double-click index.html; JSX requires
 ```sh
 npm test
 npm run build
+npx playwright install chromium
+npm run test:e2e
+npm run preview
 ```
 
 The `dist` folder is a static production build. It can be hosted on a static web server. Hash routing means deep links do not need server rewrite rules.
+
+The development server binds to localhost. The production preview is at `http://127.0.0.1:4173/pet-heaven/`. Build before preview or browser tests. Browser tests use Chromium and synthetic data in fresh browser contexts; they inspect email-draft navigation without sending mail. To test a different deployment in PowerShell:
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL = 'https://leafyve.github.io/pet-heaven/'
+npm run test:e2e
+Remove-Item Env:PLAYWRIGHT_BASE_URL
+```
+
+## GitHub Pages deployment
+
+Pushes to `main` run `.github/workflows/deploy.yml`: install the lockfile, run six logic tests, build with Vite, run five browser integration tests, upload `dist`, and deploy to the `github-pages` environment. The repository's Pages source is **GitHub Actions**. No deployment credentials are stored in the source; the workflow uses GitHub's scoped token and OIDC.
+
+`vite.config.js` sets the production and preview base to `/pet-heaven/`. JSX image paths use `import.meta.env.BASE_URL`; Vite rewrites the HTML favicon and compiled assets. All application routes follow the hash, for example `https://leafyve.github.io/pet-heaven/#/adopt/luna`, so shared links, reloads and browser back/forward work without a server fallback. If the repository is renamed, update the base and documented links together.
 
 ## Features
 
@@ -50,14 +72,16 @@ A production system would need server-side validation, secure authentication, a 
 - `src/utils.js`: filtering, validation and request export.
 - `src/styles.css`: design tokens, layouts and responsive rules.
 - `tests/logic.test.js`: executable data/validation tests.
+- `tests/browser/flows.spec.js`: browser integration tests against the production build or public site.
+- `playwright.config.js`: browser-test runner and local preview setup.
 - `photo-sources.json`: exact source image URLs.
 
 ## Submission checklist
 
 1. Review and understand the code and report. Confirm permitted AI use with the subject's assessment guidance; retain the acknowledgement.
-2. The hosted Site starts owner-private. Enable appropriate lecturer access or host `dist` on a lecturer-accessible platform, then test the link outside your own signed-in session.
+2. Use the public GitHub Pages link above. Recheck it and a deep link in a signed-out browser before submission.
 3. Record the website walkthrough with your narration using `WALKTHROUGH_SCRIPT.md`. Upload the actual recording to Google Drive and enable the appropriate viewing access.
-4. Add the real Google Drive video link in the fillable report field on page 1. If using a different host, update the website URL field too. Save and reopen the PDF to verify both fields.
+4. Add the real Google Drive video link in the fillable report field on page 1. The website field points to GitHub Pages. Save and reopen the PDF to verify both fields. No existing recording link was supplied.
 5. Submit the report and any required source-code files via Moodle by **15 November 2026, 11:50 pm Singapore time**. No Moodle submission or Google Drive upload has been performed.
 
 ## Credits

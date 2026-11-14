@@ -1,18 +1,21 @@
 import React, { createContext, useContext, useState } from "react";
 const AppContext = createContext(null);
 export const useApp = () => useContext(AppContext);
-function read(key, fallback) {
+function read(key, isValid) {
   try {
-    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+    const value = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(value) ? value.filter(isValid) : [];
   } catch {
-    return fallback;
+    return [];
   }
 }
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null),
     [accounts, setAccounts] = useState([]),
-    [saved, setSaved] = useState(() => read("ph-saved", [])),
-    [feedback, setFeedback] = useState(() => read("ph-feedback", [])),
+    [saved, setSaved] = useState(() => read("ph-saved", (id) => typeof id === "string")),
+    [feedback, setFeedback] = useState(() => read("ph-feedback", (f) =>
+      f && typeof f.name === "string" && typeof f.text === "string" &&
+      Number.isInteger(Number(f.rating)) && Number(f.rating) >= 1 && Number(f.rating) <= 5)),
     [notice, setNotice] = useState("");
   function persist(key, value) {
     try {
@@ -34,11 +37,11 @@ export function AppProvider({ children }) {
   }
   // Demo credentials stay in React memory only; this is not production authentication.
   function register(v) {
-    if (accounts.some((a) => a.email === v.email.toLowerCase()))
+    if (accounts.some((a) => a.email === v.email.trim().toLowerCase()))
       return "This email is already registered. Please log in.";
     const next = {
-      name: v.name,
-      email: v.email.toLowerCase(),
+      name: v.name.trim(),
+      email: v.email.trim().toLowerCase(),
       password: v.password,
     };
     setAccounts((a) => [...a, next]);
@@ -47,7 +50,7 @@ export function AppProvider({ children }) {
   }
   function login(v) {
     const a = accounts.find(
-      (a) => a.email === v.email.toLowerCase() && a.password === v.password,
+      (a) => a.email === v.email.trim().toLowerCase() && a.password === v.password,
     );
     if (!a)
       return "Email or password does not match. Register first in this browser visit.";

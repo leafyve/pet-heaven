@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -54,6 +54,7 @@ export function Home() {
               Our story <ArrowRight size={17} />
             </a>
           </div>
+          <p className="demo-caption">A fictional charity · Student demonstration · No real adoptions</p>
           <div className="hero-note">
             <span className="mini-paw">
               <PawPrint size={23} />
@@ -67,7 +68,7 @@ export function Home() {
         <div className="hero-visual">
           <img
             className="hero-dog"
-            src="/images/buddy.jpg"
+            src={`${import.meta.env.BASE_URL}images/buddy.jpg`}
             alt="A golden retriever looking up with a gentle expression"
             fetchPriority="high"
           />
@@ -87,7 +88,7 @@ export function Home() {
             <PawPrint size={23} />
           </div>
           <div className="cat-inset">
-            <img src="/images/luna.jpg" alt="A curious cat resting at home" />
+            <img src={`${import.meta.env.BASE_URL}images/luna.jpg`} alt="A curious cat resting at home" />
             <span>Little paws. Endless love.</span>
           </div>
         </div>
@@ -125,7 +126,7 @@ export function Home() {
       <section className="story-band">
         <div className="story-photo">
           <img
-            src="/images/mochi.jpg"
+            src={`${import.meta.env.BASE_URL}images/mochi.jpg`}
             alt="A cat enjoying a quiet moment"
             loading="lazy"
           />
@@ -173,7 +174,7 @@ export function Home() {
             [
               "03",
               "Start a new chapter",
-              "Our team reviews your request and arranges a conversation and meeting.",
+              "Prepare your request for review. In the proposed service, staff would arrange a conversation and meeting.",
             ],
           ].map(([n, t, d]) => (
             <article key={n}>
@@ -238,7 +239,7 @@ export function Directory({ savedOnly = false }) {
             onChange={(e) => setQuery(e.target.value)}
           />
         </label>
-        <div className="segmented" aria-label="Pet type">
+        <div className="segmented" role="group" aria-label="Pet type">
           {["All", "Dog", "Cat"].map((t) => (
             <button
               key={t}
@@ -286,7 +287,7 @@ export function Directory({ savedOnly = false }) {
           <h2>
             {savedOnly ? "No saved pets match yet." : "No little souls found."}
           </h2>
-          <p>Try another search or clear your filters.</p>
+          <p>{savedOnly && saved.length === 0 ? "Tap the heart on a pet card to keep your favourites here." : "Try another search or clear your filters."}</p>
           <Button
             secondary
             onClick={() => {
@@ -327,7 +328,7 @@ export function About() {
         </PageIntro>
         <div className="about-split">
           <img
-            src="/images/daisy.jpg"
+            src={`${import.meta.env.BASE_URL}images/daisy.jpg`}
             alt="A dog outdoors in a coastal setting"
           />
           <div>
@@ -531,7 +532,10 @@ export function Auth({ mode = "login", next = "/pets" }) {
     if (signup && !values.consent)
       err.consent = "Please agree to the demo privacy notice.";
     setErrors(err);
-    if (Object.keys(err).length) return;
+    if (Object.keys(err).length) {
+      setTimeout(() => document.querySelector('[aria-invalid="true"]')?.focus(), 0);
+      return;
+    }
     const issue = (signup ? register : login)(values);
     if (issue) {
       setGeneral(issue);
@@ -543,7 +547,7 @@ export function Auth({ mode = "login", next = "/pets" }) {
     <section className="auth-page">
       <div className="auth-image">
         <img
-          src="/images/luna.jpg"
+          src={`${import.meta.env.BASE_URL}images/luna.jpg`}
           alt="A curious cat ready to meet a loving family"
         />
         <div>
@@ -590,7 +594,10 @@ export function Auth({ mode = "login", next = "/pets" }) {
                 field={f}
                 value={values[f.name]}
                 error={errors[f.name]}
-                onChange={(k, v) => setValues({ ...values, [k]: v })}
+                onChange={(k, v) => {
+                  setValues({ ...values, [k]: v });
+                  setErrors((prev) => ({ ...prev, [k]: undefined }));
+                }}
               />
             ))}
             {signup && (
@@ -639,6 +646,11 @@ export function RequestForm({ kind, fields, pet }) {
     [stage, setStage] = useState("edit"),
     [recipient, setRecipient] = useState(""),
     [recipientError, setRecipientError] = useState("");
+  const stageRef = useRef();
+  useEffect(() => {
+    if (stage !== "edit") stageRef.current?.focus();
+    else stageRef.current?.querySelector("input")?.focus();
+  }, [stage]);
   const text = requestText(kind, values, pet);
   function submit(e) {
     e.preventDefault();
@@ -656,7 +668,7 @@ export function RequestForm({ kind, fields, pet }) {
   }
   if (stage === "done")
     return (
-      <div className="form-card success" role="status">
+      <div className="form-card success" ref={stageRef} tabIndex="-1" aria-label="Request prepared">
         <span className="success-icon">
           <Check />
         </span>
@@ -680,20 +692,22 @@ export function RequestForm({ kind, fields, pet }) {
           <input
             id="recipient"
             type="email"
+            aria-invalid={!!recipientError}
+            aria-describedby={recipientError ? "recipient-error" : undefined}
             value={recipient}
             placeholder="Enter the intended recipient"
             onChange={(e) => setRecipient(e.target.value)}
           />
         </div>
-        {recipientError && <p className="error">{recipientError}</p>}
+        {recipientError && <p id="recipient-error" role="alert" className="error">{recipientError}</p>}
         <Button
           onClick={() => {
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.trim())) {
               setRecipientError("Enter a valid administrator email first.");
               return;
             }
             setRecipientError("");
-            window.location.href = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent("Pet Heaven " + kind + " request")}&body=${encodeURIComponent(text)}`;
+            window.location.href = `mailto:${encodeURIComponent(recipient.trim())}?subject=${encodeURIComponent("Pet Heaven " + kind + " request")}&body=${encodeURIComponent(text)}`;
           }}
         >
           Open email draft <Mail size={17} />
@@ -709,7 +723,7 @@ export function RequestForm({ kind, fields, pet }) {
     );
   if (stage === "review")
     return (
-      <div className="form-card">
+      <div className="form-card" ref={stageRef} tabIndex="-1" aria-label="Review request">
         <p className="eyebrow">CHECK BEFORE YOU CONTINUE</p>
         <h2>Review your {kind.toLowerCase()} request.</h2>
         {pet && (
@@ -740,7 +754,7 @@ export function RequestForm({ kind, fields, pet }) {
       </div>
     );
   return (
-    <form className="form-card" noValidate onSubmit={submit}>
+    <form className="form-card" ref={stageRef} noValidate onSubmit={submit}>
       <p className="eyebrow">TELL US A LITTLE MORE</p>
       <h2>
         {kind === "Adoption"
@@ -759,7 +773,10 @@ export function RequestForm({ kind, fields, pet }) {
             field={f}
             value={values[f.name]}
             error={errors[f.name]}
-            onChange={(k, v) => setValues({ ...values, [k]: v })}
+            onChange={(k, v) => {
+                  setValues({ ...values, [k]: v });
+                  setErrors((prev) => ({ ...prev, [k]: undefined }));
+                }}
           />
         ))}
       </div>
@@ -873,6 +890,7 @@ export function Application({ kind, petId }) {
           {
             name: "petAge",
             label: "Pet age (years)",
+            step: "any",
             type: "number",
             min: 0,
             max: 30,
@@ -915,7 +933,7 @@ export function Application({ kind, petId }) {
             <>
               <img
                 className="application-photo"
-                src={`/images/${pet.id}.jpg`}
+                src={`${import.meta.env.BASE_URL}images/${pet.id}.jpg`}
                 alt={pet.name}
               />
               <h2>{pet.name}</h2>
@@ -972,7 +990,7 @@ export function Care() {
       <div className="pet-grid">
         {careGuides.map((g) => (
           <article className="guide-card" key={g.title}>
-            <img src={`/images/${g.image}.jpg`} alt={g.title} />
+            <img src={`${import.meta.env.BASE_URL}images/${g.image}.jpg`} alt={g.title} />
             <div>
               <p className="eyebrow">{g.label}</p>
               <h2>{g.title}</h2>
@@ -1105,11 +1123,11 @@ export function Community() {
         <div className="form-card">
           <h2>How was your visit?</h2>
           {user ? (
-            <form
+            <form noValidate
               onSubmit={(e) => {
                 e.preventDefault();
-                if (v.text.trim().length < 15) {
-                  setError("Please write at least 15 characters.");
+                if (!["1", "2", "3", "4", "5"].includes(v.rating) || v.text.trim().length < 15) {
+                  setError("Choose a rating from 1 to 5 and write at least 15 characters.");
                   return;
                 }
                 addFeedback(v);
