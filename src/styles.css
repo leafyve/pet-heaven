@@ -202,8 +202,8 @@ main:focus {
 }
 .icon small {
   position: absolute;
-  right: -5px;
-  top: -8px;
+  right: -3px;
+  top: -6px;
   background: var(--ink);
   color: white;
   border-radius: 50%;
