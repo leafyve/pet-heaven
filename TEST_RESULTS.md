@@ -1,6 +1,16 @@
 # Verification record
 14 November 2026 · Pet Heaven · Lim EnLe 1036488
 
+## Email export update — 14 November 2026
+
+- Prepared adoption, release and enquiry requests now offer Copy request, Download request, Open Gmail draft and Open default email app.
+- Production build and six logic tests passed. The expanded Chromium suite passed all six tests locally (`6 passed (13.1s)`).
+- Tests copy synthetic request text through the real clipboard API and compare it with the downloaded text, Gmail draft body and default-app draft body. Windows clipboard CRLF line endings are normalised for this content comparison.
+- Both email options reject blank/invalid recipients. Gmail opens in a separate tab with correctly encoded recipient, subject and body; browser tests intercept the destination so no request is sent to Gmail during the suite.
+- An additional real Gmail navigation with synthetic details reached Google's sign-in page and retained the intended compose URL. Authenticated Gmail composition and delivery were not tested; no email was sent.
+- Clipboard denial and missing Clipboard API both reveal selectable, focused request text for manual copying. Returning to review resets stale copy feedback. Prepared-screen and fallback layouts were checked at 390px and 320px without horizontal overflow; desktop and mobile screenshots were visually reviewed.
+- GitHub Actions runs the production build, logic tests and the six browser tests before deploying this update. Earlier deployment checks below are retained as historical evidence.
+
 ## Executed automated checks
 `npm test`: 6 tests passed, 0 failed.
 - Combined case-insensitive query/species/age/saved filters; incompatible filters and empty saved list.

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 async function route(page, path) {
   await page.evaluate((path) => { location.hash = path; }, path);
@@ -23,20 +24,55 @@ async function prepare(page) {
   await page.getByRole("button", { name: "Prepare email request" }).click();
   await expect(page.getByText("not sent an email", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Request prepared", { exact: true })).toBeFocused();
+  // Exercise the real clipboard API, reading back only the sample just copied.
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.getByRole("button", { name: "Copy request", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Request copied.");
+  // Windows clipboard text uses CRLF; compare the request content across platforms.
+  const copied = (await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, "\n");
+  expect(copied).toContain("student demonstration request");
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download request" }).click();
-  expect((await download).suggestedFilename()).toMatch(/^pet-heaven-.*\.txt$/);
-  await page.getByRole("button", { name: "Open email draft" }).click();
+  const saved = await download;
+  expect(saved.suggestedFilename()).toMatch(/^pet-heaven-.*\.txt$/);
+  expect(await readFile(await saved.path(), "utf8")).toBe(copied);
+  await page.getByRole("button", { name: "Open default email app" }).click();
   await expect(page.getByText("Enter a valid administrator email first.")).toBeVisible();
-  await page.getByLabel("Administrator’s email (supplied by you)").fill("staff@example.com");
+  const recipient = page.getByLabel("Administrator’s email (supplied by you)");
+  await recipient.fill("invalid-email");
+  await page.getByRole("link", { name: "Open Gmail draft" }).click();
+  await expect(recipient).toBeFocused();
+  await expect(recipient).toHaveAttribute("aria-invalid", "true");
+  expect(page.context().pages()).toHaveLength(1);
+  await recipient.fill(" staff+demo@example.com ");
+
+  // Inspect the real popup URL while keeping synthetic requests out of Gmail.
+  const gmailPattern = "https://mail.google.com/mail/**";
+  await page.context().route(gmailPattern, (route) => route.fulfill({
+    contentType: "text/html", body: "Gmail draft navigation intercepted for testing.",
+  }));
+  const newTab = page.context().waitForEvent("page");
+  await page.getByRole("link", { name: "Open Gmail draft" }).click();
+  const gmail = await newTab;
+  await gmail.waitForURL((url) => url.hostname === "mail.google.com");
+  const gmailDraft = new URL(gmail.url());
+  expect(gmailDraft.protocol).toBe("https:");
+  expect(gmailDraft.pathname).toBe("/mail/");
+  expect(gmailDraft.searchParams.get("view")).toBe("cm");
+  expect(gmailDraft.searchParams.get("to")).toBe("staff+demo@example.com");
+  expect(gmailDraft.searchParams.get("body")).toBe(copied);
+  await gmail.close();
+  await page.context().unroute(gmailPattern);
+
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Page.enable");
   const requested = new Promise((resolve) => cdp.on("Page.frameRequestedNavigation", resolve));
-  await page.getByRole("button", { name: "Open email draft" }).click();
+  await page.getByRole("button", { name: "Open default email app" }).click();
   const draft = new URL((await requested).url);
   expect(draft.protocol).toBe("mailto:");
-  expect(decodeURIComponent(draft.pathname)).toBe("staff@example.com");
-  expect(draft.searchParams.get("body")).toContain("student demonstration request");
+  expect(decodeURIComponent(draft.pathname)).toBe("staff+demo@example.com");
+  expect(draft.searchParams.get("subject")).toBe(gmailDraft.searchParams.get("su"));
+  expect(draft.searchParams.get("body")).toBe(copied);
   await cdp.detach();
 }
 
@@ -154,7 +190,7 @@ test("release and enquiry requests, care checklist and browser navigation", asyn
   await route(page, "/contact");
   await page.getByLabel("Full name").fill("Demo Visitor");
   await page.getByLabel("Email address").fill("visitor@example.com");
-  await page.getByLabel("How can we help?").fill("Please explain the proposed adoption review process.");
+  await page.getByLabel("How can we help?").fill("Please explain adoption review & interview options.");
   await prepare(page);
   await route(page, "/care");
   await page.getByRole("button", { name: "Read the guide" }).first().click();
@@ -193,4 +229,37 @@ test("mobile menu keyboard, reduced motion and malformed browser storage", async
   await expect(page.getByRole("heading", { name: "Your saved little souls." })).toBeVisible();
   await route(page, "/community");
   await expect(page.getByRole("heading", { name: "Be the first to share." })).toBeVisible();
+});
+
+test("blocked or unavailable clipboard offers selected manual copy text on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("./#/contact");
+  await page.getByLabel("Full name").fill("Demo Visitor");
+  await page.getByLabel("Email address").fill("visitor@example.com");
+  await page.getByLabel("How can we help?").fill("Please explain adoption review & interview options.");
+  await prepare(page);
+  await page.evaluate(() => Object.defineProperty(navigator.clipboard, "writeText", {
+    configurable: true,
+    value: () => Promise.reject(new DOMException("Clipboard blocked", "NotAllowedError")),
+  }));
+  await page.getByRole("button", { name: "Copy request", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Automatic copying is unavailable.");
+  const manual = page.getByLabel("Prepared request text");
+  await expect(manual).toHaveValue(/adoption review & interview options/);
+  await expect(manual).toBeFocused();
+  expect(await manual.evaluate((el) => el.selectionStart === 0 && el.selectionEnd === el.value.length)).toBe(true);
+  await page.evaluate(() => Object.defineProperty(navigator, "clipboard", {
+    configurable: true, value: undefined,
+  }));
+  await page.getByRole("button", { name: "Copy request", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Automatic copying is unavailable.");
+  await expect(manual).toBeFocused();
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.getByRole("button", { name: "Back to review" }).click();
+  await page.getByRole("button", { name: "Prepare email request" }).click();
+  await expect(manual).toHaveCount(0);
+  await expect(page.getByRole("status")).toHaveCount(0);
 });

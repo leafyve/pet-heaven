@@ -10,6 +10,7 @@ import {
   Users,
   Check,
   Mail,
+  Copy,
   Leaf,
   Star,
 } from "lucide-react";
@@ -645,13 +646,47 @@ export function RequestForm({ kind, fields, pet }) {
     [errors, setErrors] = useState({}),
     [stage, setStage] = useState("edit"),
     [recipient, setRecipient] = useState(""),
-    [recipientError, setRecipientError] = useState("");
+    [recipientError, setRecipientError] = useState(""),
+    [copyStatus, setCopyStatus] = useState(""),
+    [showManualCopy, setShowManualCopy] = useState(false);
   const stageRef = useRef();
+  const recipientRef = useRef();
+  const manualCopyRef = useRef();
   useEffect(() => {
+    setCopyStatus("");
+    setShowManualCopy(false);
     if (stage !== "edit") stageRef.current?.focus();
     else stageRef.current?.querySelector("input")?.focus();
   }, [stage]);
   const text = requestText(kind, values, pet);
+  const subject = `Pet Heaven ${kind} request`;
+  const gmailUrl = "https://mail.google.com/mail/?" + new URLSearchParams({
+    view: "cm", fs: "1", to: recipient.trim(), su: subject, body: text,
+  });
+  function checkRecipient() {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.trim())) {
+      setRecipientError("Enter a valid administrator email first.");
+      recipientRef.current?.focus();
+      return false;
+    }
+    setRecipientError("");
+    return true;
+  }
+  async function copyRequest() {
+    setCopyStatus("Copying request…");
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowManualCopy(false);
+      setCopyStatus("Request copied. Paste it into your email and send it yourself.");
+    } catch {
+      setCopyStatus("Automatic copying is unavailable. Select and copy the request below, or download it.");
+      setShowManualCopy(true);
+      setTimeout(() => {
+        manualCopyRef.current?.focus();
+        manualCopyRef.current?.select();
+      }, 0);
+    }
+  }
   function submit(e) {
     e.preventDefault();
     const err = validate(values, fields);
@@ -674,23 +709,35 @@ export function RequestForm({ kind, fields, pet }) {
         </span>
         <h2>Your request is prepared.</h2>
         <p>
-          This demo has <strong>not sent an email</strong>. Download a copy or
-          open your email app and send it to an administrator yourself.
+          This demo has <strong>not sent an email</strong>. Copy or download your
+          request, or open an email draft. You must send it yourself.
         </p>
-        <Button
-          secondary
-          onClick={() =>
-            downloadText(text, `pet-heaven-${kind.toLowerCase()}.txt`)
-          }
-        >
-          Download request
-        </Button>
+        <div className="button-row">
+          <Button secondary onClick={copyRequest}>
+            Copy request <Copy size={17} />
+          </Button>
+          <Button
+            secondary
+            onClick={() => downloadText(text, `pet-heaven-${kind.toLowerCase()}.txt`)}
+          >
+            Download request
+          </Button>
+        </div>
+        {copyStatus && <p className="fine" role="status">{copyStatus}</p>}
+        {showManualCopy && (
+          <div className="field">
+            <label htmlFor="manual-request">Prepared request text</label>
+            <textarea id="manual-request" ref={manualCopyRef} readOnly value={text} rows={8} />
+            <p className="fine">Use your device’s Copy command, then paste into your email.</p>
+          </div>
+        )}
         <div className="field">
           <label htmlFor="recipient">
             Administrator’s email (supplied by you)
           </label>
           <input
             id="recipient"
+            ref={recipientRef}
             type="email"
             aria-invalid={!!recipientError}
             aria-describedby={recipientError ? "recipient-error" : undefined}
@@ -700,21 +747,23 @@ export function RequestForm({ kind, fields, pet }) {
           />
         </div>
         {recipientError && <p id="recipient-error" role="alert" className="error">{recipientError}</p>}
-        <Button
-          onClick={() => {
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient.trim())) {
-              setRecipientError("Enter a valid administrator email first.");
-              return;
-            }
-            setRecipientError("");
-            window.location.href = `mailto:${encodeURIComponent(recipient.trim())}?subject=${encodeURIComponent("Pet Heaven " + kind + " request")}&body=${encodeURIComponent(text)}`;
-          }}
-        >
-          Open email draft <Mail size={17} />
-        </Button>
+        <div className="button-row">
+          <Button href={gmailUrl} target="_blank" rel="noopener noreferrer"
+            onClick={(event) => { if (!checkRecipient()) event.preventDefault(); }}>
+            Open Gmail draft <Mail size={17} />
+          </Button>
+          <Button secondary onClick={() => {
+            if (!checkRecipient()) return;
+            window.location.href = `mailto:${encodeURIComponent(recipient.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+          }}>
+            Open default email app <Mail size={17} />
+          </Button>
+        </div>
         <p className="fine">
-          Your email app must be configured. A draft is not proof of delivery.
-          Requests are not stored on a server.
+          Gmail opens in a new tab and may ask you to sign in. The default email
+          app must be configured on your device. Review the draft and send it
+          yourself. If neither opens, copy or download your request instead.
+          Opening a draft is not proof of delivery; requests are not stored on a server.
         </p>
         <Button secondary onClick={() => setStage("review")}>
           Back to review
