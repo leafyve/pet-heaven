@@ -75,14 +75,6 @@ A production system would need server-side validation, secure authentication, a 
 - `playwright.config.js`: browser-test runner and local preview setup.
 - `photo-sources.json`: exact source image URLs.
 
-## Submission checklist
-
-1. Review and understand the code and report. Confirm permitted AI use with the subject's assessment guidance; retain the acknowledgement.
-2. Use the public GitHub Pages link above. Recheck it and a deep link in a signed-out browser before submission.
-3. Record the website walkthrough with your narration using `WALKTHROUGH_SCRIPT.md`. Upload the actual recording to Google Drive and enable the appropriate viewing access.
-4. Add the real Google Drive video link in the fillable report field on page 1. The website field points to GitHub Pages. Save and reopen the PDF to verify both fields. No existing recording link was supplied.
-5. Submit the report and any required source-code files via Moodle by **15 November 2026, 11:50 pm Singapore time**. No Moodle submission or Google Drive upload has been performed.
-
 ## Credits
 
 Course materials: Abel Choy's supplied ISIT207 lectures (L1–L9), tutorials, revision resources, subject outline, A3 outline and marking rubric. Core concepts applied include semantic HTML, CSS Grid/Flexbox, higher-order array functions, JSX, props, hooks, Context, SPA navigation and Nielsen's heuristics.
