@@ -975,6 +975,9 @@ select {
   gap: 12px;
   flex-wrap: wrap;
 }
+.adoption-actions {
+  justify-content: center;
+}
 .review-list > div {
   padding: 14px 0;
   border-bottom: 1px solid var(--line);

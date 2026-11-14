@@ -863,7 +863,7 @@ export function Application({ kind, petId }) {
           Please join our community or log in before applying. We’ll keep your
           chosen pet ready for you.
         </PageIntro>
-        <div className="button-row">
+        <div className="button-row adoption-actions">
           <Button
             href={`#/signup?next=${encodeURIComponent("/adopt/" + petId)}`}
           >
