@@ -1,6 +1,15 @@
 # Verification record
 14 November 2026 · Pet Heaven · Lim EnLe 1036488
 
+## Final submission verification — 14 November 2026
+
+- Final application revision `1482db3` is deployed successfully on GitHub Pages. The production build and six logic tests passed again; all six browser tests passed against the public site (`6 passed (18.3s)`). Dependency audit reported zero vulnerabilities.
+- The latest interface includes Gmail/default-app drafts, copy/download exports with manual-copy fallback, centered adoption membership actions, and the round 18px saved-pet badge with its final upper-right spacing.
+- The supplied Google Drive walkthrough opened and played in a fresh signed-out browser context. Playback reported a duration of approximately 13 minutes 32 seconds, advancing video time and no media error. The local recording contains H.264 video and a non-silent AAC audio track; sampled frames show the current request controls and final application revision.
+- The final five-page review report contains the actual public website and walkthrough URLs as clickable links. Draft link prompts and unfinished submission wording were removed. Student identification, references and development acknowledgement were preserved. The final PDF was flattened, reopened, checked for placeholders and visually reviewed on all five pages.
+- The submission ZIP contains the final report, application source/assets, lockfile, tests, licences and setup instructions. Internal handoff notes, Git internals, node_modules, generated build/test files, secrets, lecture files and the large local MP4 are excluded. The walkthrough is supplied through its Drive link.
+- No Moodle upload or final submission was performed. This record documents technical/file readiness, not a guarantee of marks or an independent full accessibility audit.
+
 ## Email export update — 14 November 2026
 
 - Prepared adoption, release and enquiry requests now offer Copy request, Download request, Open Gmail draft and Open default email app.
@@ -60,4 +69,4 @@ Email checks inspect Chromium's requested `mailto:` navigation and encoded recip
 The five-page PDF now includes the primary public URL, current screenshots, responsive/keyboard/test descriptions and public-hosting status. Formatting, references and development acknowledgement are retained. The PDF was reopened and rendered: canonical website field and widget values agree; both fields retain appearance streams; the existing blank video field is preserved. The original report is retained outside the final submission folder as a backup.
 
 ## Limits
-Desktop email-client composition and actual delivery were not verified; no email was sent. Database, real identity security, cross-device persistence and real shelter processing are not implemented. Chromium was checked locally and on Linux CI; Safari, Firefox, physical devices and a full accessibility/assistive-technology audit were not tested. The student must record the narrated walkthrough, upload it to Google Drive, enable lecturer viewing, add the actual video URL to the report and submit through Moodle. No video URL was supplied and no Moodle submission was performed.
+Desktop email-client composition and actual delivery were not verified; no email was sent. Database, real identity security, cross-device persistence and real shelter processing are not implemented. Chromium was checked locally and on Linux CI; Safari, Firefox, physical devices and a full accessibility/assistive-technology audit were not tested. The walkthrough was recorded, uploaded and linked in the final review report; public playback was checked without signing in. The final Moodle upload/submission remains the student's action.
