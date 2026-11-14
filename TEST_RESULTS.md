@@ -42,6 +42,7 @@ Email checks inspect Chromium's requested `mailto:` navigation and encoded recip
 - Mobile menu opens and navigates to the pet directory.
 - Final 320px signed-in header and menu logout checked without horizontal overflow.
 - Desktop home/directory, tablet contact and mobile About, Contact, Care, Community, Credits, Login, Sign-up and Release layouts captured and visually reviewed.
+- An axe-core scan of 11 public routes at desktop and phone widths found two remaining home-page colour-contrast issues. Story copy and step-number colours were darkened for a repeat scan. Automated checks complement the keyboard and visual review; they do not establish full WCAG conformance.
 
 ## Report verification
 

@@ -613,7 +613,7 @@ main:focus {
 }
 .story-band p:not(.eyebrow) {
   font-size: 13px;
-  color: #66715e;
+  color: #566359;
 }
 .steps {
   display: grid;
@@ -623,7 +623,7 @@ main:focus {
 }
 .steps article > span {
   font: italic 36px var(--serif);
-  color: #a8b39a;
+  color: #6f8062;
   display: block;
   margin-bottom: 20px;
 }
