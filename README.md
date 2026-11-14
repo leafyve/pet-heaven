@@ -79,4 +79,4 @@ A production system would need server-side validation, secure authentication, a 
 
 Course materials: Abel Choy's supplied ISIT207 lectures (L1–L9), tutorials, revision resources, subject outline, A3 outline and marking rubric. Core concepts applied include semantic HTML, CSS Grid/Flexbox, higher-order array functions, JSX, props, hooks, Context, SPA navigation and Nielsen's heuristics.
 
-Real photographs: Unsplash, https://unsplash.com/license (exact assets in photo-sources.json). Icons: Lucide, ISC licence, https://lucide.dev/license. Fonts: DM Sans and Manrope via Google Fonts, with local system fallbacks; display headings use Georgia. React documentation: https://react.dev/learn. General care reference: https://www.aspca.org/pet-care.
+Real photographs: Unsplash, https://unsplash.com/license (exact assets in photo-sources.json). Icons: Lucide, ISC licence, https://lucide.dev/license. Font: DM Sans via Google Fonts, used throughout the website with a system sans-serif fallback. React documentation: https://react.dev/learn. General care reference: https://www.aspca.org/pet-care.
