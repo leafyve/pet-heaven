@@ -7,6 +7,7 @@
 - `npm audit`: zero vulnerabilities after the Vite 6 patch.
 - GitHub Actions run `43576009476` built, tested and deployed commit `da81d42` successfully.
 - All five browser tests passed against https://leafyve.github.io/pet-heaven/ in fresh unsigned Chromium contexts; public initial load reported zero console errors.
+- Final contrast update `b753147` deployed in successful run `43576372715`; repeated public browser suite passed and axe-core found zero violations across 11 routes at desktop and phone widths under the selected WCAG A/AA rules.
 
 # IN PROGRESS
 

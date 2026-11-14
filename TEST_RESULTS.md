@@ -22,6 +22,7 @@
 - Commit `da81d42`: build, six logic tests, five browser tests and Pages deployment succeeded on Ubuntu.
 - `npm run test:e2e`: all five tests passed against local production preview and the public site. Public result: `5 passed (11.8s)` in fresh unsigned Chromium contexts, with no ChatGPT or GitHub sign-in.
 - Independent public home-page check: zero console errors or warnings observed.
+- Final contrast update `b753147` deployed successfully: https://github.com/leafyve/pet-heaven/actions/runs/43576372715. The full public browser suite passed again after this deployment.
 
 Executable tests in `tests/browser/flows.spec.js` cover every route, invalid routes, image decoding and console/runtime errors; responsive layouts at 320, 390, 768, 1024 and 1440px; filters/sorting; saved persistence; dialog Tab wrapping/Escape/focus restoration; member-gated selected-pet adoption; signup/login/logout and session reset; invalid input; adoption/release/enquiry review/edit focus, preparation, text downloads and email-draft navigation; member feedback; readiness; back/forward and refresh; mobile menu; reduced motion; malformed browser storage.
 
@@ -42,7 +43,7 @@ Email checks inspect Chromium's requested `mailto:` navigation and encoded recip
 - Mobile menu opens and navigates to the pet directory.
 - Final 320px signed-in header and menu logout checked without horizontal overflow.
 - Desktop home/directory, tablet contact and mobile About, Contact, Care, Community, Credits, Login, Sign-up and Release layouts captured and visually reviewed.
-- An axe-core scan of 11 public routes at desktop and phone widths found two remaining home-page colour-contrast issues. Story copy and step-number colours were darkened for a repeat scan. Automated checks complement the keyboard and visual review; they do not establish full WCAG conformance.
+- After darkening the story text and step numbers, the repeat axe-core scan of 11 public routes at 1440px and 390px reported zero violations under its WCAG 2 A/AA and WCAG 2.1 AA rules. Automated checks complement the keyboard and visual review; they do not establish full WCAG conformance.
 
 ## Report verification
 
