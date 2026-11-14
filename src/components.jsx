@@ -76,6 +76,7 @@ export function Header({ route }) {
           <a className="mobile-link" href="#/community">Community</a>
           <a className="mobile-link" href="#/release">Rehome a pet</a>
           {!user && <a className="mobile-link" href="#/login">Log in</a>}
+          {user && <button className="mobile-link text-button" onClick={logout}>Log out</button>}
         </nav>
         <div className="header-actions">
           <a

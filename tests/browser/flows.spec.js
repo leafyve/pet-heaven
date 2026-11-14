@@ -124,7 +124,11 @@ test("member gate, sign-up, adoption review/edit/download, feedback and login", 
   await page.getByLabel("Your rating").selectOption("4");
   await page.getByRole("button", { name: "Share feedback" }).click();
   await expect(page.locator(".feedback-card")).toHaveCount(1);
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "Toggle navigation" }).click();
   await page.getByRole("button", { name: "Log out", exact: true }).click();
+  await page.setViewportSize({ width: 1280, height: 900 });
   await route(page, "/login");
   await page.getByLabel("Email address").fill("demo@example.com");
   await page.getByLabel(/^Password/).fill("incorrect");
